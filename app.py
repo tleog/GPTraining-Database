@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import Chroma
+from langchain.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
 
@@ -35,7 +35,7 @@ if query:
 
     # Embed and create vector store
     embeddings = OpenAIEmbeddings(openai_api_key=api_key)
-    vectorstore = Chroma.from_documents(splits, embeddings)
+    vectorstore = FAISS.from_documents(splits, embeddings)
 
     # QA chain setup
     qa = RetrievalQA.from_chain_type(
