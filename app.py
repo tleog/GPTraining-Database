@@ -20,7 +20,7 @@ query = st.text_input("Ask your question")
 
 if query:
     # Load all PDFs from the 'documents' folder
-    folder_path = "Documents"
+    folder_path = "documents"
     all_docs = []
 
     for filename in os.listdir(folder_path):
@@ -52,7 +52,7 @@ if query:
 
 st.subheader("📚 Downloadable Files")
 
-folder_path = "Documents"
+folder_path = "documents"
 
 with st.expander("Show available files for download"):
     for filename in os.listdir(folder_path):
