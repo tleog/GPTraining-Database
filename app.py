@@ -20,7 +20,7 @@ query = st.text_input("Ask your question")
 
 if query:
     # Load all PDFs from the 'documents' folder
-    folder_path = "documents"
+    folder_path = "Documents"
     all_docs = []
 
     for filename in os.listdir(folder_path):
