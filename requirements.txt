@@ -1,7 +1,8 @@
 streamlit
-python-dotenv
+langchain==0.1.17
+langchain-community==0.0.36
+chromadb==0.4.24
 openai
-langchain
-langchain-community
-chromadb
+python-dotenv
+protobuf==3.20.*
 pypdf
