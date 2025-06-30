@@ -12,8 +12,8 @@ from langchain.chat_models import ChatOpenAI
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 
-st.set_page_config(page_title="GP Trainee Chatbot")
-st.title("💬 GP Trainee Support Chatbot")
+st.set_page_config(page_title="GP Trainee Virtual Assistant", page_icon=":robot_face:", layout="wide")
+st.title("💬 GP Trainee Virtual Assistant")
 st.write("Ask questions about study leave, exception reports, mileage claims, and more!")
 
 query = st.text_input("Ask your question")
