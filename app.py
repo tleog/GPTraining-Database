@@ -50,18 +50,18 @@ if query:
         st.write(answer)
 
 
-st.subheader("📚 Downloadable Files")
+# st.subheader("📚 Downloadable Files")
 
-folder_path = "documents"
+# folder_path = "documents"
 
-with st.expander("Show available files for download"):
-    for filename in os.listdir(folder_path):
-        if filename.endswith(".pdf"):
-            file_path = os.path.join(folder_path, filename)
-            with open(file_path, "rb") as f:
-                st.download_button(
-                    label=f"📄 Download {filename}",
-                    data=f,
-                    file_name=filename,
-                    mime="application/pdf"
-                )
+# with st.expander("Show available files for download"):
+#     for filename in os.listdir(folder_path):
+#         if filename.endswith(".pdf"):
+#             file_path = os.path.join(folder_path, filename)
+#             with open(file_path, "rb") as f:
+#                 st.download_button(
+#                     label=f"📄 Download {filename}",
+#                     data=f,
+#                     file_name=filename,
+#                     mime="application/pdf"
+#                 )
