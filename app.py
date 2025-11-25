@@ -1,67 +1,111 @@
 import os
 import streamlit as st
 from dotenv import load_dotenv
+
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
+from langchain.prompts import PromptTemplate
 
-# Load API key
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 
 st.set_page_config(page_title="GP Trainee Virtual Assistant", page_icon=":robot_face:")
-st.title("💬 GP Trainee Virtual Assistant")
+st.title("GP Trainee Virtual Assistant")
 st.write("Ask questions about study leave, exception reports, mileage claims, and more!")
+
+if not api_key:
+    st.error("OPENAI_API_KEY is not set. Please add it to your .env file.")
+    st.stop()
+
+DOCUMENTS_FOLDER = "documents"
+
+
+def get_files_signature(folder_path: str) -> str:
+    """Changes whenever PDFs are added/removed/edited."""
+    if not os.path.isdir(folder_path):
+        return ""
+    sigs = []
+    for filename in os.listdir(folder_path):
+        if filename.lower().endswith(".pdf"):
+            path = os.path.join(folder_path, filename)
+            stat = os.stat(path)
+            sigs.append(f"{filename}:{stat.st_size}:{stat.st_mtime_ns}")
+    sigs.sort()
+    return "|".join(sigs)
+
+
+@st.cache_resource(show_spinner="Building document index…")
+def build_vectorstore(files_signature: str):
+    """Build and cache FAISS for the current PDFs."""
+    if not os.path.isdir(DOCUMENTS_FOLDER):
+        raise ValueError("No 'documents' folder found.")
+    all_docs = []
+    for filename in os.listdir(DOCUMENTS_FOLDER):
+        if filename.lower().endswith(".pdf"):
+            path = os.path.join(DOCUMENTS_FOLDER, filename)
+            loader = PyPDFLoader(path)
+            docs = loader.load()
+            for d in docs:
+                d.metadata["source_file"] = filename
+            all_docs.extend(docs)
+    if not all_docs:
+        raise ValueError("No PDFs found in the 'documents' folder.")
+
+    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    splits = splitter.split_documents(all_docs)
+
+    embeddings = OpenAIEmbeddings(openai_api_key=api_key)
+    return FAISS.from_documents(splits, embeddings)
+
+
+files_signature = get_files_signature(DOCUMENTS_FOLDER)
+vectorstore = build_vectorstore(files_signature)
+
+prompt_template = """
+You are a helpful assistant for GP trainees in the UK.
+Use ONLY the following context (local guidance, policies, or documents) to answer the question.
+
+If the answer is not clearly stated, say you are not sure and suggest who they could contact.
+
+Always:
+- Keep answers concise and practical.
+- Mention the document name in brackets when you use it, e.g. [Study Leave Policy 2024].
+- If there is conflicting information, say so.
+
+Question: {question}
+=========
+{context}
+=========
+Answer:
+"""
+
+prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
+
+qa = RetrievalQA.from_chain_type(
+    llm=ChatOpenAI(openai_api_key=api_key),
+    retriever=vectorstore.as_retriever(),
+    chain_type="stuff",
+    chain_type_kwargs={"prompt": prompt},
+    return_source_documents=True,
+)
 
 query = st.text_input("Ask your question")
 
 if query:
-    # Load all PDFs from the 'documents' folder
-    folder_path = "documents"
-    all_docs = []
-
-    for filename in os.listdir(folder_path):
-        if filename.endswith(".pdf"):
-            loader = PyPDFLoader(os.path.join(folder_path, filename))
-            docs = loader.load()
-            all_docs.extend(docs)
-
-    # Split the documents
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    splits = text_splitter.split_documents(all_docs)
-
-    # Embed and create vector store
-    embeddings = OpenAIEmbeddings(openai_api_key=api_key)
-    vectorstore = FAISS.from_documents(splits, embeddings)
-
-    # QA chain setup
-    qa = RetrievalQA.from_chain_type(
-        llm=ChatOpenAI(openai_api_key=api_key),
-        retriever=vectorstore.as_retriever()
-    )
-
-    # Get answer
     with st.spinner("Thinking..."):
-        answer = qa.run(query)
-        st.markdown("### 📘 Answer:")
-        st.write(answer)
+        result = qa({"query": query})
+        answer = result["result"]
+        sources = result["source_documents"]
 
+    st.markdown("### 📘 Answer:")
+    st.write(answer)
 
-# st.subheader("📚 Downloadable Files")
-
-# folder_path = "documents"
-
-# with st.expander("Show available files for download"):
-#     for filename in os.listdir(folder_path):
-#         if filename.endswith(".pdf"):
-#             file_path = os.path.join(folder_path, filename)
-#             with open(file_path, "rb") as f:
-#                 st.download_button(
-#                     label=f"📄 Download {filename}",
-#                     data=f,
-#                     file_name=filename,
-#                     mime="application/pdf"
-#                 )
+    with st.expander("🔍 Documents used"):
+        for i, doc in enumerate(sources, start=1):
+            filename = doc.metadata.get("source_file", "Unknown file")
+            page = doc.metadata.get("page", "Unknown page")
+            st.markdown(f"**Source {i}:** `{filename}`, page {page}")
