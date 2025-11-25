@@ -38,7 +38,7 @@ def get_files_signature(folder_path: str) -> str:
     return "|".join(sigs)
 
 
-@st.cache_resource(show_spinner="Building document index…")
+@st.cache_resource(show_spinner="Building document database... This may take a few minutes.")
 def build_vectorstore(files_signature: str):
     """Build and cache FAISS for the current PDFs."""
     if not os.path.isdir(DOCUMENTS_FOLDER):
