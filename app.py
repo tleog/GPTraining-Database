@@ -75,6 +75,9 @@ Always:
 - Keep answers concise and practical.
 - Mention the document name in brackets when you use it, e.g. [Study Leave Policy 2024].
 - If there is conflicting information, say so.
+- Format any lists with bullet points.
+- Format answers clearly with paragraphs and headings and emojis where appropriate
+
 
 Question: {question}
 =========
