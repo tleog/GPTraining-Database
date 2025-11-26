@@ -122,7 +122,7 @@ qa = RetrievalQA.from_chain_type(
     return_source_documents=True,
 )
 
-query = st.text_area("Ask your question", height=120, placeholder="Type your GP training question here")
+query = st.text_area("Ask your question", height=120, placeholder="Type your question here...")
 
 if query:
     with st.spinner("Thinking..."):
