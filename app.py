@@ -13,9 +13,20 @@ from langchain.prompts import PromptTemplate
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 
-st.set_page_config(page_title="GP Trainee Virtual Assistant", page_icon=":robot_face:")
-st.title("GP Trainee Virtual Assistant")
-st.write("Ask questions about study leave, exception reports, mileage claims, and more!")
+st.set_page_config(page_title="GP Trainee Virtual Assistant", page_icon="🩺")
+
+st.markdown(
+    """
+    <div style="text-align:center; padding:12px 0 6px;">
+        <div style="font-size:42px; line-height:1.1;">🩺 GP Trainee Virtual Assistant</div>
+        <div style="color:#4a5568; margin-top:6px;">
+            Ask about study leave, exception reports, mileage claims, and more.
+        </div>
+    </div>
+    <hr style="margin:12px 0 18px;">
+    """,
+    unsafe_allow_html=True,
+)
 
 if not api_key:
     st.error("OPENAI_API_KEY is not set. Please add it to your .env file.")
@@ -72,11 +83,8 @@ Use ONLY the following context (local guidance, policies, or documents) to answe
 If the answer is not clearly stated, say you are not sure and suggest who they could contact.
 
 Always:
-- Keep answers concise and practical.
-- Mention the document name in brackets when you use it, e.g. [Study Leave Policy 2024].
+- Keep answers concise and practical and formatted with headings and bullet points and emojis for ease of reading.
 - If there is conflicting information, say so.
-- Format any lists with bullet points.
-- Format answers clearly with paragraphs and headings and emojis where appropriate
 - Do not make up answers.
 - Do not provide legal or medical advice.
 - Do not share personal opinions.
@@ -85,12 +93,9 @@ Always:
 - Do not provide source code or technical details.
 - If explicitly asked for hypothetical examples, make them clearly hypothetical and do not answer anything unrelated to GP training.
 - Do not provide contact details unless they are in the context.
-- Do not reference the context if it is not relevant to the question.
 - Do not include square brackets or document citations during the answer as these will be provided separately in the source documents.
 - If the question is unrelated to GP training, politely decline to answer.
 - If you are unsure about the answer, suggest who they could contact for help (GP Trainee Council, Training Programme Director, etc.)
-- Always cite the sources of your information from the provided context.
-- If the question is about something that may have changed recently (e.g. due to COVID-19), mention that policies may have changed.
 - If the question is about personal situations, suggest contacting the Training Programme Director or relevant authority.
 - If the question is about mental health or wellbeing, suggest contacting appropriate support services.
 - If the question is about exceptions or appeals, suggest following official procedures as per the provided documents.
@@ -99,8 +104,6 @@ Always:
 - if the question is about career progression or opportunities, provide information based on the documents.
 - If the question is about mentorship or support, suggest relevant programs mentioned in the context.
 - If the question is about work-life balance, provide advice based on the context.
-- Give bullet point steps or numbered lists where appropriate to enhance clarity.
-
 
 Question: {question}
 =========
