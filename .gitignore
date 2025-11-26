@@ -1,2 +1,4 @@
 #ignore API keys upload
 .env
+# Ignore everything under documents/ignore
+/documents/ignore/
