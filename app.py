@@ -122,9 +122,16 @@ qa = RetrievalQA.from_chain_type(
     return_source_documents=True,
 )
 
-query = st.text_area("Ask your question", height=120, placeholder="Type your question here...")
+with st.form("search_form", clear_on_submit=False):
+    col1, col2 = st.columns([12, 1])
+    with col1:
+        # single-line input so pressing Enter submits the form
+        query = st.text_input("Ask your question", placeholder="Type your question here...")
+    with col2:
+        # magnifying glass button
+        submit = st.form_submit_button("🔍")
 
-if query:
+if submit and query:
     with st.spinner("Thinking..."):
         result = qa({"query": query})
         answer = result["result"]
